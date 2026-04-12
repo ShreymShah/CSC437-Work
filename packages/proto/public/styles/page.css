@@ -1,0 +1,93 @@
+/* Site-wide styles for the trading prototype */
+
+body {
+  background-color: var(--color-background-page);
+  color: var(--color-text);
+  margin: 0;
+  padding: 0;
+}
+
+header {
+  background-color: var(--color-background-header);
+  color: var(--color-text-header);
+  padding: 1rem 1.5rem;
+  border-bottom: 2px solid var(--color-border-accent);
+}
+
+header h1 {
+  margin: 0 0 0.25rem;
+  color: var(--color-text-header);
+}
+
+nav {
+  background-color: var(--color-background-surface);
+  padding: 0.5rem 1.5rem;
+  border-bottom: 1px solid var(--color-border);
+}
+
+main,
+article {
+  padding: 1.5rem;
+}
+
+h1 {
+  color: var(--color-accent);
+}
+
+h2 {
+  color: var(--color-text-header);
+  border-bottom: 1px solid var(--color-border);
+  padding-bottom: 0.25rem;
+}
+
+a {
+  color: var(--color-link);
+}
+
+a:hover {
+  color: var(--color-link-hover);
+}
+
+section {
+  background-color: var(--color-background-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  padding: 1rem 1.25rem;
+  margin-bottom: 1rem;
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+  background-color: var(--color-background-surface);
+  border: 1px solid var(--color-border);
+}
+
+table caption {
+  color: var(--color-text-muted);
+  margin-bottom: 0.5rem;
+  text-align: left;
+}
+
+thead tr {
+  background-color: var(--color-background-table-head);
+}
+
+th,
+td {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--color-border);
+  text-align: left;
+}
+
+th {
+  color: var(--color-text-header);
+}
+
+footer {
+  background-color: var(--color-background-header);
+  color: var(--color-text-muted);
+  border-top: 1px solid var(--color-border);
+  padding: 0.75rem 1.5rem;
+  font-size: 0.875rem;
+}

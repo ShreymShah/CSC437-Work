@@ -1,0 +1,25 @@
+/* Design Tokens — all color constants for the trading prototype */
+:root {
+  /* Accent */
+  --color-accent: rgb(0 200 100);
+  --color-accent-dim: rgb(0 145 72);
+
+  /* Links */
+  --color-link: var(--color-accent);
+  --color-link-hover: rgb(80 230 150);
+
+  /* Text */
+  --color-text: rgb(210 220 235);
+  --color-text-muted: rgb(130 148 172);
+  --color-text-header: rgb(245 248 255);
+
+  /* Backgrounds */
+  --color-background-page: rgb(15 20 35);
+  --color-background-header: rgb(8 12 22);
+  --color-background-surface: rgb(22 30 50);
+  --color-background-table-head: rgb(30 42 68);
+
+  /* Borders */
+  --color-border: rgb(40 55 85);
+  --color-border-accent: var(--color-accent-dim);
+}
