@@ -2,35 +2,87 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Backtest Results</title>
+    <link rel="stylesheet" href="/styles/reset.css" />
     <link rel="stylesheet" href="/styles/tokens.css" />
     <link rel="stylesheet" href="/styles/page.css" />
+    <link rel="stylesheet" href="/styles/layout.css" />
 </head>
 <body>
-    <nav><a href="index.html">← Back to Strategy</a></nav>
-    <main>
-        <h1>Historical Simulation: 2024 Alpha</h1>
-        <p>Testing strategy against <a href="instrument.html">BTC/USD</a>.</p>
-        
-        <table>
-            <caption>Performance Metrics</caption>
-            <thead>
-                <tr>
-                    <th>Metric</th>
-                    <th>Value</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>Win Rate</td>
-                    <td><strong>62%</strong></td>
-                </tr>
-                <tr>
-                    <td>Max Drawdown</td>
-                    <td><strong>12.4%</strong></td>
-                </tr>
-            </tbody>
-        </table>
-    </main>
+    <header class="site-header">
+        <a href="index.html" class="header-brand">
+            <span class="brand-icon">▲</span>
+            <span class="brand-name">AlgoTrader</span>
+        </a>
+        <span class="header-title">Mean Reversion Alpha</span>
+        <nav class="header-nav">
+            <a href="signal.html">Signals</a>
+            <a href="instrument.html">Instruments</a>
+            <a href="backtest.html" class="active">Backtests</a>
+            <a href="broker.html">Brokers</a>
+        </nav>
+        <div class="header-user">
+            <span class="user-name">Shrey Shah</span>
+            <div class="user-avatar" aria-label="User avatar">SS</div>
+        </div>
+    </header>
+
+    <div class="page-grid">
+        <aside class="page-sidebar">
+            <div class="sidebar-section">
+                <p class="sidebar-section-label">Strategy</p>
+                <ul class="sidebar-nav">
+                    <li><a href="index.html">Mean Reversion Alpha</a></li>
+                </ul>
+            </div>
+            <div class="sidebar-section">
+                <p class="sidebar-section-label">Components</p>
+                <ul class="sidebar-nav">
+                    <li><a href="signal.html">Latest Buy Signal</a></li>
+                    <li><a href="instrument.html">BTC/USD</a></li>
+                    <li><a href="backtest.html" class="active">Q1 2024 Simulation</a></li>
+                    <li><a href="broker.html">Coinbase Exchange</a></li>
+                </ul>
+            </div>
+        </aside>
+
+        <main class="page-main">
+            <h1>Historical Simulation: 2024 Alpha</h1>
+            <p>Testing strategy against <a href="instrument.html">BTC/USD</a>.</p>
+
+            <table>
+                <caption>Performance Metrics</caption>
+                <thead>
+                    <tr>
+                        <th>Metric</th>
+                        <th>Value</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Win Rate</td>
+                        <td><strong>62%</strong></td>
+                    </tr>
+                    <tr>
+                        <td>Max Drawdown</td>
+                        <td><strong>12.4%</strong></td>
+                    </tr>
+                    <tr>
+                        <td>Sharpe Ratio</td>
+                        <td><strong>1.8</strong></td>
+                    </tr>
+                    <tr>
+                        <td>Total Trades</td>
+                        <td><strong>104</strong></td>
+                    </tr>
+                </tbody>
+            </table>
+        </main>
+    </div>
+
+    <footer>
+        <p>CSC437 Lab 2 — Algorithmic Trading Prototype</p>
+    </footer>
 </body>
 </html>

@@ -2,33 +2,74 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Instrument: BTC/USD</title>
+    <link rel="stylesheet" href="/styles/reset.css" />
     <link rel="stylesheet" href="/styles/tokens.css" />
     <link rel="stylesheet" href="/styles/page.css" />
+    <link rel="stylesheet" href="/styles/layout.css" />
 </head>
 <body>
-    <nav>
-        <a href="index.html">&larr; Back to Strategy Dashboard</a>
-    </nav>
+    <header class="site-header">
+        <a href="index.html" class="header-brand">
+            <span class="brand-icon">▲</span>
+            <span class="brand-name">AlgoTrader</span>
+        </a>
+        <span class="header-title">Mean Reversion Alpha</span>
+        <nav class="header-nav">
+            <a href="signal.html">Signals</a>
+            <a href="instrument.html" class="active">Instruments</a>
+            <a href="backtest.html">Backtests</a>
+            <a href="broker.html">Brokers</a>
+        </nav>
+        <div class="header-user">
+            <span class="user-name">Shrey Shah</span>
+            <div class="user-avatar" aria-label="User avatar">SS</div>
+        </div>
+    </header>
 
-    <article>
-        <header>
+    <div class="page-grid">
+        <aside class="page-sidebar">
+            <div class="sidebar-section">
+                <p class="sidebar-section-label">Strategy</p>
+                <ul class="sidebar-nav">
+                    <li><a href="index.html">Mean Reversion Alpha</a></li>
+                </ul>
+            </div>
+            <div class="sidebar-section">
+                <p class="sidebar-section-label">Components</p>
+                <ul class="sidebar-nav">
+                    <li><a href="signal.html">Latest Buy Signal</a></li>
+                    <li><a href="instrument.html" class="active">BTC/USD</a></li>
+                    <li><a href="backtest.html">Q1 2024 Simulation</a></li>
+                    <li><a href="broker.html">Coinbase Exchange</a></li>
+                </ul>
+            </div>
+        </aside>
+
+        <main class="page-main">
             <h1>Bitcoin / US Dollar</h1>
-        </header>
 
-        <section>
-            <h2>Asset Details</h2>
-            <ul>
-                <li><strong>Ticker:</strong> BTC/USD</li>
-                <li><strong>Asset Class:</strong> Cryptocurrency</li>
-                <li><strong>Listed On:</strong> <a href="broker.html">Coinbase</a></li>
-            </ul>
-        </section>
+            <div class="card-grid">
+                <section>
+                    <h2>Asset Details</h2>
+                    <ul>
+                        <li><strong>Ticker:</strong> BTC/USD</li>
+                        <li><strong>Asset Class:</strong> Cryptocurrency</li>
+                        <li><strong>Listed On:</strong> <a href="broker.html">Coinbase</a></li>
+                    </ul>
+                </section>
 
-        <section>
-            <h2>Activity</h2>
-            <p>This instrument is currently being targeted by <a href="signal.html">Signal #104</a>.</p>
-        </section>
-    </article>
+                <section>
+                    <h2>Activity</h2>
+                    <p>This instrument is currently being targeted by <a href="signal.html">Signal #104</a>.</p>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <footer>
+        <p>CSC437 Lab 2 — Algorithmic Trading Prototype</p>
+    </footer>
 </body>
 </html>

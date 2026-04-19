@@ -2,22 +2,67 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Signal Details</title>
+    <link rel="stylesheet" href="/styles/reset.css" />
     <link rel="stylesheet" href="/styles/tokens.css" />
     <link rel="stylesheet" href="/styles/page.css" />
+    <link rel="stylesheet" href="/styles/layout.css" />
 </head>
 <body>
-    <nav><a href="index.html">← Back to Strategy</a></nav>
-    <article>
-        <header><h1>Buy Signal #104</h1></header>
-        <section>
-            <h2>Data</h2>
-            <ul>
-                <li><strong>Type:</strong> Long (Buy)</li>
-                <li><strong>Strength:</strong> 85%</li>
-                <li><strong>Target Asset:</strong> <a href="instrument.html">BTC/USD</a></li>
-            </ul>
-        </section>
-    </article>
+    <header class="site-header">
+        <a href="index.html" class="header-brand">
+            <span class="brand-icon">▲</span>
+            <span class="brand-name">AlgoTrader</span>
+        </a>
+        <span class="header-title">Mean Reversion Alpha</span>
+        <nav class="header-nav">
+            <a href="signal.html" class="active">Signals</a>
+            <a href="instrument.html">Instruments</a>
+            <a href="backtest.html">Backtests</a>
+            <a href="broker.html">Brokers</a>
+        </nav>
+        <div class="header-user">
+            <span class="user-name">Shrey Shah</span>
+            <div class="user-avatar" aria-label="User avatar">SS</div>
+        </div>
+    </header>
+
+    <div class="page-grid">
+        <aside class="page-sidebar">
+            <div class="sidebar-section">
+                <p class="sidebar-section-label">Strategy</p>
+                <ul class="sidebar-nav">
+                    <li><a href="index.html">Mean Reversion Alpha</a></li>
+                </ul>
+            </div>
+            <div class="sidebar-section">
+                <p class="sidebar-section-label">Components</p>
+                <ul class="sidebar-nav">
+                    <li><a href="signal.html" class="active">Latest Buy Signal</a></li>
+                    <li><a href="instrument.html">BTC/USD</a></li>
+                    <li><a href="backtest.html">Q1 2024 Simulation</a></li>
+                    <li><a href="broker.html">Coinbase Exchange</a></li>
+                </ul>
+            </div>
+        </aside>
+
+        <main class="page-main">
+            <h1>Buy Signal #104</h1>
+
+            <section>
+                <h2>Data</h2>
+                <ul>
+                    <li><strong>Type:</strong> Long (Buy)</li>
+                    <li><strong>Strength:</strong> 85%</li>
+                    <li><strong>Target Asset:</strong> <a href="instrument.html">BTC/USD</a></li>
+                </ul>
+            </section>
+        </main>
+    </div>
+
+    <footer>
+        <p>CSC437 Lab 2 — Algorithmic Trading Prototype</p>
+    </footer>
 </body>
 </html>
