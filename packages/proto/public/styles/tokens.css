@@ -35,3 +35,19 @@
   --sidebar-width: 220px;
   --border-radius: 4px;
 }
+
+body.light-mode {
+  --color-accent: rgb(0 140 70);
+  --color-accent-dim: rgb(0 110 55);
+  --color-link: rgb(0 140 70);
+  --color-link-hover: rgb(0 100 50);
+  --color-text: rgb(30 40 60);
+  --color-text-muted: rgb(80 100 130);
+  --color-text-header: rgb(10 20 40);
+  --color-background-page: rgb(248 249 252);
+  --color-background-header: rgb(255 255 255);
+  --color-background-surface: rgb(237 241 248);
+  --color-background-table-head: rgb(220 228 242);
+  --color-border: rgb(195 208 228);
+  --color-border-accent: rgb(0 140 70);
+}
