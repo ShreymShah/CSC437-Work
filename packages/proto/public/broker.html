@@ -8,6 +8,21 @@
     <link rel="stylesheet" href="/styles/tokens.css" />
     <link rel="stylesheet" href="/styles/page.css" />
     <link rel="stylesheet" href="/styles/layout.css" />
+    <script type="importmap">
+    {
+      "imports": {
+        "@unbndl/html": "https://unpkg.com/@unbndl/html"
+      }
+    }
+    </script>
+    <script type="module">
+      import { define } from "@unbndl/html";
+      import { AlgoStatElement } from "/js/algo-stat.js";
+
+      define({
+        "algo-stat": AlgoStatElement
+      });
+    </script>
 </head>
 <body>
     <header class="site-header">
@@ -58,8 +73,8 @@
                 <h2>Exchange Info</h2>
                 <p>The venue where orders are routed and instruments are listed.</p>
                 <ul>
-                    <li><strong>Execution Speed:</strong> 50ms</li>
-                    <li><strong>Available Assets:</strong> <a href="instrument.html">BTC/USD</a>, ETH/USD</li>
+                    <algo-stat label="Execution Speed" unit="ms">50</algo-stat>
+                    <algo-stat label="Available Assets"><a href="instrument.html">BTC/USD</a>, ETH/USD</algo-stat>
                 </ul>
             </section>
         </main>

@@ -8,6 +8,21 @@
     <link rel="stylesheet" href="/styles/tokens.css" />
     <link rel="stylesheet" href="/styles/page.css" />
     <link rel="stylesheet" href="/styles/layout.css" />
+    <script type="importmap">
+    {
+      "imports": {
+        "@unbndl/html": "https://unpkg.com/@unbndl/html"
+      }
+    }
+    </script>
+    <script type="module">
+      import { define } from "@unbndl/html";
+      import { AlgoStatElement } from "/js/algo-stat.js";
+
+      define({
+        "algo-stat": AlgoStatElement
+      });
+    </script>
 </head>
 <body>
     <header class="site-header">
@@ -59,19 +74,19 @@
                 <section>
                     <h2>Strategy Components</h2>
                     <ul>
-                        <li><strong>Generates:</strong> <a href="signal.html">Latest Buy Signal (BTC)</a></li>
-                        <li><strong>Trades:</strong> <a href="instrument.html">Bitcoin (BTC/USD)</a></li>
-                        <li><strong>Validated By:</strong> <a href="backtest.html">Q1 2024 Historical Simulation</a></li>
-                        <li><strong>Routes Via:</strong> <a href="broker.html">Coinbase Exchange</a></li>
+                        <algo-stat label="Generates" href="signal.html">Latest Buy Signal (BTC)</algo-stat>
+                        <algo-stat label="Trades" href="instrument.html">Bitcoin (BTC/USD)</algo-stat>
+                        <algo-stat label="Validated By" href="backtest.html">Q1 2024 Historical Simulation</algo-stat>
+                        <algo-stat label="Routes Via" href="broker.html">Coinbase Exchange</algo-stat>
                     </ul>
                 </section>
 
                 <section>
                     <h2>Strategy Status</h2>
                     <ul>
-                        <li><strong>Status:</strong> Active</li>
-                        <li><strong>Asset:</strong> BTC/USD</li>
-                        <li><strong>Signal Strength:</strong> 85%</li>
+                        <algo-stat label="Status" status="active">Active</algo-stat>
+                        <algo-stat label="Asset" href="instrument.html">BTC/USD</algo-stat>
+                        <algo-stat label="Signal Strength" unit="%">85</algo-stat>
                     </ul>
                 </section>
             </div>

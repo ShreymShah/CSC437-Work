@@ -8,6 +8,21 @@
     <link rel="stylesheet" href="/styles/tokens.css" />
     <link rel="stylesheet" href="/styles/page.css" />
     <link rel="stylesheet" href="/styles/layout.css" />
+    <script type="importmap">
+    {
+      "imports": {
+        "@unbndl/html": "https://unpkg.com/@unbndl/html"
+      }
+    }
+    </script>
+    <script type="module">
+      import { define } from "@unbndl/html";
+      import { AlgoStatElement } from "/js/algo-stat.js";
+
+      define({
+        "algo-stat": AlgoStatElement
+      });
+    </script>
 </head>
 <body>
     <header class="site-header">
@@ -57,9 +72,9 @@
             <section>
                 <h2>Data</h2>
                 <ul>
-                    <li><strong>Type:</strong> Long (Buy)</li>
-                    <li><strong>Strength:</strong> 85%</li>
-                    <li><strong>Target Asset:</strong> <a href="instrument.html">BTC/USD</a></li>
+                    <algo-stat label="Type">Long (Buy)</algo-stat>
+                    <algo-stat label="Strength" unit="%">85</algo-stat>
+                    <algo-stat label="Target Asset" href="instrument.html">BTC/USD</algo-stat>
                 </ul>
             </section>
         </main>
