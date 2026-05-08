@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Trading Strategy: Mean Reversion Alpha</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,700;1,400&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="/styles/reset.css" />
     <link rel="stylesheet" href="/styles/tokens.css" />
     <link rel="stylesheet" href="/styles/page.css" />
@@ -18,9 +21,11 @@
     <script type="module">
       import { define } from "@unbndl/html";
       import { AlgoStatElement } from "/js/algo-stat.js";
+      import { AlgoStrategyElement } from "/js/algo-strategy.js";
 
       define({
-        "algo-stat": AlgoStatElement
+        "algo-stat": AlgoStatElement,
+        "algo-strategy": AlgoStrategyElement
       });
     </script>
 </head>
@@ -58,10 +63,10 @@
             <div class="sidebar-section">
                 <p class="sidebar-section-label">Components</p>
                 <ul class="sidebar-nav">
-                    <li><a href="signal.html">Latest Buy Signal</a></li>
-                    <li><a href="instrument.html">BTC/USD</a></li>
-                    <li><a href="backtest.html">Q1 2024 Simulation</a></li>
-                    <li><a href="broker.html">Coinbase Exchange</a></li>
+                    <li><a href="signal.html"><svg class="icon"><use href="/icons/finance.svg#icon-signal"/></svg> Latest Buy Signal</a></li>
+                    <li><a href="instrument.html"><svg class="icon"><use href="/icons/finance.svg#icon-instrument"/></svg> BTC/USD</a></li>
+                    <li><a href="backtest.html"><svg class="icon"><use href="/icons/finance.svg#icon-backtest"/></svg> Q1 2024 Simulation</a></li>
+                    <li><a href="broker.html"><svg class="icon"><use href="/icons/finance.svg#icon-broker"/></svg> Coinbase Exchange</a></li>
                 </ul>
             </div>
         </aside>
@@ -70,26 +75,7 @@
             <h1>Mean Reversion Alpha</h1>
             <p><strong>Logic:</strong> Enters positions when price deviates 2 standard deviations from the 20-day SMA.</p>
 
-            <div class="card-grid">
-                <section>
-                    <h2>Strategy Components</h2>
-                    <ul>
-                        <algo-stat label="Generates" href="signal.html">Latest Buy Signal (BTC)</algo-stat>
-                        <algo-stat label="Trades" href="instrument.html">Bitcoin (BTC/USD)</algo-stat>
-                        <algo-stat label="Validated By" href="backtest.html">Q1 2024 Historical Simulation</algo-stat>
-                        <algo-stat label="Routes Via" href="broker.html">Coinbase Exchange</algo-stat>
-                    </ul>
-                </section>
-
-                <section>
-                    <h2>Strategy Status</h2>
-                    <ul>
-                        <algo-stat label="Status" status="active">Active</algo-stat>
-                        <algo-stat label="Asset" href="instrument.html">BTC/USD</algo-stat>
-                        <algo-stat label="Signal Strength" unit="%">85</algo-stat>
-                    </ul>
-                </section>
-            </div>
+            <algo-strategy src="/data/strategy.json"></algo-strategy>
         </main>
     </div>
 
