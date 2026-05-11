@@ -1,27 +1,36 @@
+import { Schema, model } from "mongoose";
 import { Strategy } from "../models/index.ts";
 
-const strategies: { [key: string]: Strategy } = {
-  "mean-reversion-alpha": {
-    id: "mean-reversion-alpha",
-    name: "Mean Reversion Alpha",
-    description:
-      "Enters positions when price deviates 2 standard deviations from the 20-day SMA.",
-    components: [
-      { label: "Generates", href: "signal.html", value: "Latest Buy Signal (BTC)" },
-      { label: "Trades", href: "instrument.html", value: "Bitcoin (BTC/USD)" },
-      { label: "Validated By", href: "backtest.html", value: "Q1 2024 Historical Simulation" },
-      { label: "Routes Via", href: "broker.html", value: "Coinbase Exchange" }
-    ],
-    status: [
-      { label: "Status", status: "active", value: "Active" },
-      { label: "Asset", href: "instrument.html", value: "BTC/USD" },
-      { label: "Signal Strength", unit: "%", value: "85" }
-    ]
-  }
+const algoStatSchema = {
+  label: String,
+  value: String,
+  href: String,
+  unit: String,
+  status: String,
 };
 
-function get(id: string): Strategy | undefined {
-  return strategies[id];
+const strategySchema = new Schema<Strategy>(
+  {
+    id: String,
+    name: String,
+    description: String,
+    components: [algoStatSchema],
+    status: [algoStatSchema],
+  },
+  { collection: "strategies" }
+);
+
+const StrategyModel = model<Strategy>("Strategy", strategySchema);
+
+function index(): Promise<Strategy[]> {
+  return StrategyModel.find();
 }
 
-export default { get };
+function get(id: string): Promise<Strategy | null> {
+  return StrategyModel.findOne({ id }).then((strategy) => {
+    if (!strategy) throw `${id} Not Found`;
+    return strategy;
+  });
+}
+
+export default { index, get };

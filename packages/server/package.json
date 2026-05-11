@@ -13,7 +13,9 @@
     "check": "tsc --noEmit"
   },
   "dependencies": {
-    "express": "^4.21.2"
+    "dotenv": "^17.4.2",
+    "express": "^4.21.2",
+    "mongoose": "^9.6.2"
   },
   "devDependencies": {
     "@types/express": "^5.0.1",
