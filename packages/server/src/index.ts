@@ -1,6 +1,7 @@
 import express, { Request, Response } from "express";
 import { connect } from "./services/mongo.ts";
 import strategies from "./routes/strategies.ts";
+import auth, { authenticateUser } from "./routes/auth.ts";
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -15,7 +16,8 @@ app.get("/hello", (req: Request, res: Response) => {
   res.send("Hello, World");
 });
 
-app.use("/api/strategies", strategies);
+app.use("/auth", auth);
+app.use("/api/strategies", authenticateUser, strategies);
 
 app.listen(port, () => {
   console.log(`Server running at http://localhost:${port}`);
