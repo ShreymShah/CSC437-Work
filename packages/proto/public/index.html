@@ -14,74 +14,60 @@
     <script type="importmap">
     {
       "imports": {
-        "@unbndl/html": "https://unpkg.com/@unbndl/html"
+        "@unbndl/html": "https://unpkg.com/@unbndl/html",
+        "@unbndl/auth": "https://unpkg.com/@unbndl/auth"
       }
     }
     </script>
     <script type="module">
       import { define } from "@unbndl/html";
+      import { Auth } from "@unbndl/auth";
       import { AlgoStatElement } from "/js/algo-stat.js";
       import { AlgoStrategyElement } from "/js/algo-strategy.js";
+      import { AlgoHeaderElement } from "/js/header.js";
 
       define({
         "algo-stat": AlgoStatElement,
-        "algo-strategy": AlgoStrategyElement
+        "algo-strategy": AlgoStrategyElement,
+        "algo-header": AlgoHeaderElement,
+        "auth-provider": Auth.Provider
       });
     </script>
 </head>
 <body>
-    <header class="site-header">
-        <a href="index.html" class="header-brand">
-            <span class="brand-icon">▲</span>
-            <span class="brand-name">AlgoTrader</span>
-        </a>
-        <span class="header-title">Mean Reversion Alpha</span>
-        <nav class="header-nav">
-            <a href="signal.html">Signals</a>
-            <a href="instrument.html">Instruments</a>
-            <a href="backtest.html">Backtests</a>
-            <a href="broker.html">Brokers</a>
-        </nav>
-        <label class="theme-toggle-label">
-            <input type="checkbox" autocomplete="off" />
-            Light mode
-        </label>
-        <div class="header-user">
-            <span class="user-name">Shrey Shah</span>
-            <div class="user-avatar" aria-label="User avatar">SS</div>
+    <auth-provider>
+        <algo-header>Mean Reversion Alpha</algo-header>
+
+        <div class="page-grid">
+            <aside class="page-sidebar">
+                <div class="sidebar-section">
+                    <p class="sidebar-section-label">Strategy</p>
+                    <ul class="sidebar-nav">
+                        <li><a href="index.html" class="active">Mean Reversion Alpha</a></li>
+                    </ul>
+                </div>
+                <div class="sidebar-section">
+                    <p class="sidebar-section-label">Components</p>
+                    <ul class="sidebar-nav">
+                        <li><a href="signal.html"><svg class="icon"><use href="/icons/finance.svg#icon-signal"/></svg> Latest Buy Signal</a></li>
+                        <li><a href="instrument.html"><svg class="icon"><use href="/icons/finance.svg#icon-instrument"/></svg> BTC/USD</a></li>
+                        <li><a href="backtest.html"><svg class="icon"><use href="/icons/finance.svg#icon-backtest"/></svg> Q1 2024 Simulation</a></li>
+                        <li><a href="broker.html"><svg class="icon"><use href="/icons/finance.svg#icon-broker"/></svg> Coinbase Exchange</a></li>
+                    </ul>
+                </div>
+            </aside>
+
+            <main class="page-main">
+                <h1>Mean Reversion Alpha</h1>
+                <p><strong>Logic:</strong> Enters positions when price deviates 2 standard deviations from the 20-day SMA.</p>
+
+                <algo-strategy src="/api/strategies"></algo-strategy>
+            </main>
         </div>
-    </header>
 
-    <div class="page-grid">
-        <aside class="page-sidebar">
-            <div class="sidebar-section">
-                <p class="sidebar-section-label">Strategy</p>
-                <ul class="sidebar-nav">
-                    <li><a href="index.html" class="active">Mean Reversion Alpha</a></li>
-                </ul>
-            </div>
-            <div class="sidebar-section">
-                <p class="sidebar-section-label">Components</p>
-                <ul class="sidebar-nav">
-                    <li><a href="signal.html"><svg class="icon"><use href="/icons/finance.svg#icon-signal"/></svg> Latest Buy Signal</a></li>
-                    <li><a href="instrument.html"><svg class="icon"><use href="/icons/finance.svg#icon-instrument"/></svg> BTC/USD</a></li>
-                    <li><a href="backtest.html"><svg class="icon"><use href="/icons/finance.svg#icon-backtest"/></svg> Q1 2024 Simulation</a></li>
-                    <li><a href="broker.html"><svg class="icon"><use href="/icons/finance.svg#icon-broker"/></svg> Coinbase Exchange</a></li>
-                </ul>
-            </div>
-        </aside>
-
-        <main class="page-main">
-            <h1>Mean Reversion Alpha</h1>
-            <p><strong>Logic:</strong> Enters positions when price deviates 2 standard deviations from the 20-day SMA.</p>
-
-            <algo-strategy src="/data/strategy.json"></algo-strategy>
-        </main>
-    </div>
-
-    <footer>
-        <p>CSC437 Lab 2 — Algorithmic Trading Prototype</p>
-    </footer>
-    <script type="module" src="/scripts/darkmode.js"></script>
+        <footer>
+            <p>CSC437 Lab 2 — Algorithmic Trading Prototype</p>
+        </footer>
+    </auth-provider>
 </body>
 </html>

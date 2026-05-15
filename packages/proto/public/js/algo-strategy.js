@@ -21,15 +21,20 @@ export class AlgoStrategyElement extends HTMLElement {
   attributeChangedCallback(name, _, newValue) {
     if (name === "src") {
       this.hydrate(newValue).then((data) => {
-        const view = AlgoStrategyElement.render(data);
-        shadow(this).replace(view);
+        if (data) shadow(this).replace(AlgoStrategyElement.render(data));
       });
     }
   }
 
+  get authorization() {
+    const token = localStorage.getItem("un-auth:token");
+    return token ? { Authorization: `Bearer ${token}` } : {};
+  }
+
   static render(data) {
-    const components = data?.components || [];
-    const status = data?.status || [];
+    const item = Array.isArray(data) ? data[0] : data;
+    const components = item?.components || [];
+    const status = item?.status || [];
     return html`
       <div class="card-grid">
         <section>
@@ -49,14 +54,15 @@ export class AlgoStrategyElement extends HTMLElement {
   }
 
   hydrate(src) {
-    return fetch(src)
+    return fetch(src, { headers: this.authorization })
       .then((response) => {
         if (response.status !== 200)
           throw `HTTP Status ${response.status}`;
-        else return response.json();
+        return response.json();
       })
       .catch((error) => {
         console.log(`Could not fetch ${src}:`, error);
+        return null;
       });
   }
 
@@ -87,9 +93,7 @@ export class AlgoStrategyElement extends HTMLElement {
       padding-left: var(--space-lg);
     }
     @media (max-width: 480px) {
-      .card-grid {
-        grid-template-columns: 1fr;
-      }
+      .card-grid { grid-template-columns: 1fr; }
     }
   `;
 }
