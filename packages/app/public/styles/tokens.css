@@ -1,0 +1,53 @@
+/* Design Tokens — all color constants for the trading prototype */
+:root {
+  /* Accent */
+  --color-accent: rgb(0 200 100);
+  --color-accent-dim: rgb(0 145 72);
+
+  /* Links */
+  --color-link: var(--color-accent);
+  --color-link-hover: rgb(80 230 150);
+
+  /* Text */
+  --color-text: rgb(210 220 235);
+  --color-text-muted: rgb(130 148 172);
+  --color-text-header: rgb(245 248 255);
+
+  /* Backgrounds */
+  --color-background-page: rgb(15 20 35);
+  --color-background-header: rgb(8 12 22);
+  --color-background-surface: rgb(22 30 50);
+  --color-background-table-head: rgb(30 42 68);
+
+  /* Borders */
+  --color-border: rgb(40 55 85);
+  --color-border-accent: var(--color-accent-dim);
+
+  /* Spacing */
+  --space-xs: 0.25rem;
+  --space-sm: 0.5rem;
+  --space-md: 1rem;
+  --space-lg: 1.5rem;
+  --space-xl: 2rem;
+  --space-2xl: 3rem;
+
+  /* Layout */
+  --sidebar-width: 220px;
+  --border-radius: 4px;
+}
+
+body.light-mode {
+  --color-accent: rgb(0 140 70);
+  --color-accent-dim: rgb(0 110 55);
+  --color-link: rgb(0 140 70);
+  --color-link-hover: rgb(0 100 50);
+  --color-text: rgb(30 40 60);
+  --color-text-muted: rgb(80 100 130);
+  --color-text-header: rgb(10 20 40);
+  --color-background-page: rgb(248 249 252);
+  --color-background-header: rgb(255 255 255);
+  --color-background-surface: rgb(237 241 248);
+  --color-background-table-head: rgb(220 228 242);
+  --color-border: rgb(195 208 228);
+  --color-border-accent: rgb(0 140 70);
+}

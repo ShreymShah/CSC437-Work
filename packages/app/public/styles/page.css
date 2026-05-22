@@ -1,0 +1,113 @@
+/* Site-wide element styles for the trading prototype */
+
+body {
+  background-color: var(--color-background-page);
+  color: var(--color-text);
+  font-family: 'Inter', 'Segoe UI', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+h1 {
+  color: var(--color-accent);
+  font-size: 1.5rem;
+  font-family: 'Space Grotesk', 'Segoe UI', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-weight: 700;
+}
+
+h2 {
+  color: var(--color-text-header);
+  border-bottom: 1px solid var(--color-border);
+  padding-bottom: var(--space-xs);
+  margin-bottom: var(--space-md);
+  font-size: 1rem;
+  font-family: 'Space Grotesk', 'Segoe UI', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-weight: 500;
+}
+
+h3 {
+  color: var(--color-text-header);
+  margin-bottom: var(--space-sm);
+  font-size: 0.9rem;
+  font-family: 'Space Grotesk', 'Segoe UI', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-weight: 500;
+}
+
+svg.icon {
+  display: inline;
+  height: 2em;
+  width: 2em;
+  vertical-align: top;
+  fill: currentColor;
+}
+
+a {
+  color: var(--color-link);
+}
+
+a:hover {
+  color: var(--color-link-hover);
+}
+
+p {
+  margin-bottom: var(--space-sm);
+}
+
+p:last-child {
+  margin-bottom: 0;
+}
+
+section {
+  background-color: var(--color-background-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius);
+  padding: var(--space-md) var(--space-lg);
+}
+
+ul {
+  padding-left: var(--space-lg);
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+  background-color: var(--color-background-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius);
+  overflow: hidden;
+}
+
+table caption {
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-sm);
+  text-align: left;
+  font-size: 0.875rem;
+}
+
+thead tr {
+  background-color: var(--color-background-table-head);
+}
+
+th,
+td {
+  padding: var(--space-sm) var(--space-md);
+  border: 1px solid var(--color-border);
+  text-align: left;
+}
+
+th {
+  color: var(--color-text-header);
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+td {
+  font-size: 0.9rem;
+}
+
+footer {
+  background-color: var(--color-background-header);
+  color: var(--color-text-muted);
+  border-top: 1px solid var(--color-border);
+  padding: var(--space-sm) var(--space-lg);
+  font-size: 0.875rem;
+  text-align: center;
+}
