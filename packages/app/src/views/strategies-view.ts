@@ -1,6 +1,18 @@
 import { css, html, shadow } from "@unbndl/html";
+import { createViewModel } from "@unbndl/view";
+import { Store, fromStore } from "@unbndl/store";
+import { Strategy } from "server/models";
+import { Msg } from "../messages.ts";
+import { Model } from "../model.ts";
+
+interface StrategiesViewModel {
+  strategies?: Strategy[];
+}
 
 export class StrategiesViewElement extends HTMLElement {
+  viewModel = createViewModel<StrategiesViewModel>({ strategies: undefined })
+    .with(fromStore<Model>(this), "strategies");
+
   static styles = css`
     :host { display: block; padding: var(--space-xl); }
     h1 { color: var(--color-text-header); margin-bottom: var(--space-lg); }
@@ -22,42 +34,33 @@ export class StrategiesViewElement extends HTMLElement {
       <h1>Strategies</h1>
       <div class="strategy-list"><p class="empty">Loading...</p></div>
     `);
+
+    this.viewModel.createEffect(($) => {
+      this._render($.strategies);
+    });
   }
 
   connectedCallback() {
-    this.loadStrategies();
+    Store.dispatch(this, ["strategies/request", {}] as Msg);
   }
 
-  get authorization() {
-    const token = localStorage.getItem("un-auth:token");
-    return token ? { Authorization: `Bearer ${token}` } : {};
-  }
-
-  loadStrategies() {
-    fetch("/api/strategies", { headers: this.authorization })
-      .then(res => {
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        return res.json();
-      })
-      .then(data => {
-        const list = Array.isArray(data) ? data : [data];
-        const container = this.shadowRoot?.querySelector(".strategy-list");
-        if (!container) return;
-        if (list.length === 0) {
-          container.innerHTML = `<p class="empty">No strategies found.</p>`;
-          return;
-        }
-        container.innerHTML = "";
-        list.forEach(s => {
-          const card = document.createElement("div");
-          card.className = "strategy-card";
-          card.innerHTML = `<h2>${s.name || "Unnamed Strategy"}</h2><p>${s.logic || ""}</p>`;
-          container.appendChild(card);
-        });
-      })
-      .catch(() => {
-        const container = this.shadowRoot?.querySelector(".strategy-list");
-        if (container) container.innerHTML = `<p class="empty">Failed to load strategies.</p>`;
-      });
+  private _render(strategies?: Strategy[]) {
+    const container = this.shadowRoot?.querySelector(".strategy-list");
+    if (!container) return;
+    if (!strategies) {
+      container.innerHTML = `<p class="empty">Loading...</p>`;
+      return;
+    }
+    if (strategies.length === 0) {
+      container.innerHTML = `<p class="empty">No strategies found.</p>`;
+      return;
+    }
+    container.innerHTML = "";
+    strategies.forEach(s => {
+      const card = document.createElement("div");
+      card.className = "strategy-card";
+      card.innerHTML = `<h2>${s.name || "Unnamed Strategy"}</h2><p>${s.description || ""}</p>`;
+      container.appendChild(card);
+    });
   }
 }

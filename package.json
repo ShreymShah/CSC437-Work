@@ -19,5 +19,11 @@
   },
   "workspaces": [
     "packages/*"
-]
+  ],
+  "dependencies": {
+    "@unbndl/auth": "^1.0.7",
+    "@unbndl/service": "^1.0.11",
+    "@unbndl/store": "^1.0.11",
+    "@unbndl/switch": "^1.0.9"
+  }
 }

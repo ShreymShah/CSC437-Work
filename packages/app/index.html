@@ -15,10 +15,12 @@
 <body>
     <history-provider>
       <auth-provider redirect="/login.html">
-        <article class="page">
-          <algo-header></algo-header>
-          <router-switch></router-switch>
-        </article>
+        <store-provider>
+          <article class="page">
+            <algo-header></algo-header>
+            <router-switch></router-switch>
+          </article>
+        </store-provider>
       </auth-provider>
     </history-provider>
 </body>
