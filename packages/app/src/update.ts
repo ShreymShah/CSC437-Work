@@ -36,12 +36,23 @@ export default function update(
     case "strategy/load": {
       const { strategy } = payload as { strategy: Strategy };
       // Keep the cached list in sync with the freshly loaded strategy so
-      // every view observing the store (e.g. the list) reflects the edit.
-      const strategies = model.strategies?.map((s) =>
-        s.id === strategy.id ? strategy : s
-      );
+      // every view observing the store (e.g. the list) reflects it. Replace
+      // the matching entry if it exists, otherwise append it (handles create).
+      const strategies = model.strategies
+        ? model.strategies.some((s) => s.id === strategy.id)
+          ? model.strategies.map((s) => (s.id === strategy.id ? strategy : s))
+          : [...model.strategies, strategy]
+        : model.strategies;
       return { ...model, strategy, strategies };
     }
+
+    case "strategy/create":
+      // Like save, but POSTs a brand-new strategy. The resolved
+      // "strategy/load" command folds the created record into the store.
+      return [
+        { ...model },
+        createStrategy(payload as { strategy: Strategy }, auth)
+      ] as Message.Async<Model, Cmd>;
 
     case "strategy/save":
       // Don't touch the model yet — wait for the PUT response, then the
@@ -116,6 +127,34 @@ function saveStrategy(
       // Re-throw so the dispatcher's onFailure reaction fires (and so every
       // path returns a Promise<Cmd>, satisfying the type checker).
       console.log("Error saving strategy:", err);
+      throw err;
+    });
+}
+
+// Like saveStrategy, but issues a POST to create a new strategy. The server
+// responds with the created record, fed back as a "strategy/load" command.
+function createStrategy(
+  payload: { strategy: Strategy },
+  auth: Auth.Model
+): Promise<Cmd | Message.None> {
+  return fetch("/api/strategies", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      ...Auth.headers(auth)
+    } as HeadersInit,
+    body: JSON.stringify(payload.strategy)
+  })
+    .then((res: Response) => {
+      if (res.ok) return res.json();
+      throw new Error(`HTTP ${res.status} creating strategy`);
+    })
+    .then((data: unknown) => {
+      if (data) return ["strategy/load", { strategy: data as Strategy }] as Cmd;
+      throw new Error("No JSON in API response");
+    })
+    .catch((err: Error) => {
+      console.log("Error creating strategy:", err);
       throw err;
     });
 }

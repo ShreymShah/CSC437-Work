@@ -15,7 +15,26 @@ export class StrategiesViewElement extends HTMLElement {
 
   static styles = css`
     :host { display: block; padding: var(--space-xl); }
-    h1 { color: var(--color-text-header); margin-bottom: var(--space-lg); }
+    .list-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--space-md);
+      margin-bottom: var(--space-lg);
+    }
+    h1 { color: var(--color-text-header); margin: 0; }
+    .new-link {
+      display: inline-flex;
+      align-items: center;
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 0.9rem;
+      padding: var(--space-sm) var(--space-lg);
+      border-radius: var(--border-radius);
+      color: var(--color-background-page);
+      background-color: var(--color-accent);
+    }
+    .new-link:hover { opacity: 0.85; }
     .strategy-list { list-style: none; padding: 0; display: grid; gap: var(--space-md); }
     .strategy-card {
       display: block;
@@ -34,7 +53,10 @@ export class StrategiesViewElement extends HTMLElement {
   constructor() {
     super();
     shadow(this).styles(StrategiesViewElement.styles).replace(html`
-      <h1>Strategies</h1>
+      <div class="list-header">
+        <h1>Strategies</h1>
+        <a class="new-link" href="/app/strategies/new">+ New Strategy</a>
+      </div>
       <div class="strategy-list"><p class="empty">Loading...</p></div>
     `);
 

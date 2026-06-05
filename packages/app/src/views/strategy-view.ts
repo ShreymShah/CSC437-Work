@@ -11,7 +11,16 @@ import { AlgoStat, Strategy } from "server/models";
 import { Msg } from "../messages.ts";
 import { Model } from "../model.ts";
 
-type StrategyMode = "view" | "edit";
+type StrategyMode = "view" | "edit" | "new";
+
+// An empty strategy used to seed the create form in "new" mode.
+const BLANK_STRATEGY: Strategy = {
+  id: "",
+  name: "",
+  description: "",
+  components: [],
+  status: []
+};
 
 interface StrategyViewModel {
   mode: StrategyMode;
@@ -95,12 +104,44 @@ export class StrategyViewElement extends HTMLElement {
     </form>
   `);
 
-  // The top-level view: pick the editor or the read-only card, or show a
-  // loading message until the store has the strategy.
+  // The create form. Like editView, but with an extra `id` field since a new
+  // strategy needs a unique id (in edit mode the id comes from the route).
+  newView = createView<Strategy>(html`
+    <form class="card">
+      <h1>New Strategy</h1>
+      <label>
+        <span>ID</span>
+        <input
+          name="id"
+          required
+          placeholder="e.g. btc-momentum"
+          .value=${($) => $.id ?? ""}
+        />
+      </label>
+      <label>
+        <span>Name</span>
+        <input name="name" .value=${($) => $.name ?? ""} />
+      </label>
+      <label>
+        <span>Description</span>
+        <textarea name="description" rows="4" .value=${($) =>
+          $.description ?? ""}></textarea>
+      </label>
+      <div class="actions">
+        <button type="submit">Create</button>
+        <a class="btn cancel" href="/app/strategies">Cancel</a>
+      </div>
+    </form>
+  `);
+
+  // The top-level view: in "new" mode show the create form; otherwise pick the
+  // editor or the read-only card once the store has the strategy.
   view = createView<StrategyViewModel>(html`
     <section class="strategy">
       ${($) =>
-        $.strategy
+        $.mode === "new"
+          ? View.apply(this.newView, BLANK_STRATEGY)
+          : $.strategy
           ? View.apply(
               $.mode === "edit" ? this.editView : this.mainView,
               $.strategy
@@ -130,9 +171,37 @@ export class StrategyViewElement extends HTMLElement {
 
     const form = ev.target as HTMLFormElement;
     const json = this.formDataToJSON(form);
+
+    if (this.viewModel.$.mode === "new") {
+      // Creating: the id comes from the form. Default the nested arrays so the
+      // record satisfies the Strategy shape even though the form omits them.
+      const id = (json.id ?? "").trim();
+      if (!id) return;
+
+      const strategy = {
+        components: [],
+        status: [],
+        ...json,
+        id
+      } as Strategy;
+
+      Store.dispatch(this, [
+        "strategy/create",
+        { strategy },
+        {
+          onSuccess: () =>
+            BrowserHistory.dispatch(this, "history/navigate", {
+              href: `/app/strategies/${id}`
+            }),
+          onFailure: (error: Error) => console.log("ERROR:", error)
+        }
+      ] as Msg);
+      return;
+    }
+
+    // Editing: the id comes from the route attribute, not the form.
     const id = this.viewModel.$.strategyId;
     const current = this.viewModel.$.strategy;
-
     if (!id) return;
 
     // Merge the edited fields over the current strategy so nested data

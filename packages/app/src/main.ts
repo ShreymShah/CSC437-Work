@@ -21,6 +21,12 @@ class HardRedirect extends HTMLElement {
 
 const routes: Switch.Route[] = [
   {
+    path: "/app/strategies/new",
+    view: createView<Switch.Args>(
+      html`<strategy-view mode="new"></strategy-view>`
+    )
+  },
+  {
     path: "/app/strategies/:id/edit",
     view: createView<Switch.Args>(
       html`<strategy-view
