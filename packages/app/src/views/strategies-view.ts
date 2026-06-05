@@ -18,11 +18,14 @@ export class StrategiesViewElement extends HTMLElement {
     h1 { color: var(--color-text-header); margin-bottom: var(--space-lg); }
     .strategy-list { list-style: none; padding: 0; display: grid; gap: var(--space-md); }
     .strategy-card {
+      display: block;
+      text-decoration: none;
       background-color: var(--color-background-surface);
       border: 1px solid var(--color-border);
       border-radius: var(--border-radius);
       padding: var(--space-md) var(--space-lg);
     }
+    .strategy-card:hover { border-color: var(--color-accent-dim); }
     .strategy-card h2 { color: var(--color-text-header); font-size: 1rem; margin: 0 0 var(--space-xs); }
     .strategy-card p { color: var(--color-text-muted); font-size: 0.875rem; margin: 0; }
     .empty { color: var(--color-text-muted); }
@@ -57,8 +60,9 @@ export class StrategiesViewElement extends HTMLElement {
     }
     container.innerHTML = "";
     strategies.forEach(s => {
-      const card = document.createElement("div");
+      const card = document.createElement("a");
       card.className = "strategy-card";
+      card.setAttribute("href", `/app/strategies/${s.id}`);
       card.innerHTML = `<h2>${s.name || "Unnamed Strategy"}</h2><p>${s.description || ""}</p>`;
       container.appendChild(card);
     });

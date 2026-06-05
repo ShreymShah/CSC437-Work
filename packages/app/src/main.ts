@@ -6,6 +6,7 @@ import { createView } from "@unbndl/view";
 import { AlgoHeaderElement } from "./components/algo-header.ts";
 import { HomeViewElement } from "./views/home-view.ts";
 import { StrategiesViewElement } from "./views/strategies-view.ts";
+import { StrategyViewElement } from "./views/strategy-view.ts";
 import { Msg } from "./messages.ts";
 import { Model, init } from "./model.ts";
 import update, { Cmd } from "./update.ts";
@@ -19,6 +20,24 @@ class HardRedirect extends HTMLElement {
 }
 
 const routes: Switch.Route[] = [
+  {
+    path: "/app/strategies/:id/edit",
+    view: createView<Switch.Args>(
+      html`<strategy-view
+        strategy-id=${($) => $.params.id}
+        mode="edit"
+      ></strategy-view>`
+    )
+  },
+  {
+    path: "/app/strategies/:id",
+    view: createView<Switch.Args>(
+      html`<strategy-view
+        strategy-id=${($) => $.params.id}
+        mode="view"
+      ></strategy-view>`
+    )
+  },
   {
     path: "/app/strategies",
     view: createView<Switch.Args>(html`<strategies-view></strategies-view>`)
@@ -48,6 +67,7 @@ define({
   "algo-header": AlgoHeaderElement,
   "home-view": HomeViewElement,
   "strategies-view": StrategiesViewElement,
+  "strategy-view": StrategyViewElement,
   "store-provider": class AppStore extends Store.Provider<Model, Msg, Cmd> {
     constructor() {
       super(update, init);

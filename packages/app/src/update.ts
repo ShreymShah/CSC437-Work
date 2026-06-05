@@ -13,24 +13,50 @@ export default function update(
   message: Msg | Cmd,
   auth: Auth.Model
 ): Model | Message.Async<Model, Cmd> {
-  const [type, payload] = message as [string, Record<string, unknown>];
-  switch (type) {
+  const [command, payload] = message;
+  switch (command) {
     case "strategies/request":
       return [
         { ...model },
         fetchStrategies(auth)
       ] as Message.Async<Model, Cmd>;
+
     case "strategies/load":
-      return { ...model, strategies: (payload as { strategies: Strategy[] }).strategies };
+      return {
+        ...model,
+        strategies: (payload as { strategies: Strategy[] }).strategies
+      };
+
     case "strategy/request":
       return [
         { ...model, strategy: undefined },
         fetchStrategy((payload as { id: string }).id, auth)
       ] as Message.Async<Model, Cmd>;
-    case "strategy/load":
-      return { ...model, strategy: (payload as { strategy: Strategy }).strategy };
-    default:
-      throw new Error(`Unhandled message "${type}"`);
+
+    case "strategy/load": {
+      const { strategy } = payload as { strategy: Strategy };
+      // Keep the cached list in sync with the freshly loaded strategy so
+      // every view observing the store (e.g. the list) reflects the edit.
+      const strategies = model.strategies?.map((s) =>
+        s.id === strategy.id ? strategy : s
+      );
+      return { ...model, strategy, strategies };
+    }
+
+    case "strategy/save":
+      // Don't touch the model yet — wait for the PUT response, then the
+      // resolved "strategy/load" command updates the store atomically.
+      return [
+        { ...model },
+        saveStrategy(payload as { id: string; strategy: Strategy }, auth)
+      ] as Message.Async<Model, Cmd>;
+
+    default: {
+      // Exhaustiveness check: if every Msg/Cmd is handled above, `command`
+      // narrows to `never` here. Forget a case and TypeScript will flag it.
+      const unhandled: never = command;
+      throw new Error(`Unhandled message "${unhandled}"`);
+    }
   }
 }
 
@@ -61,4 +87,35 @@ function fetchStrategy(id: string, auth: Auth.Model): Promise<Cmd | Message.None
       return ["strategy/load", { strategy: data as Strategy }] as Cmd;
     })
     .catch(() => Message.None);
+}
+
+// Like fetchStrategy, but issues a PUT with the edited strategy as the JSON
+// body. The server responds with the updated record, which we feed back into
+// the store as a "strategy/load" command.
+function saveStrategy(
+  payload: { id: string; strategy: Strategy },
+  auth: Auth.Model
+): Promise<Cmd | Message.None> {
+  return fetch(`/api/strategies/${payload.id}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      ...Auth.headers(auth)
+    } as HeadersInit,
+    body: JSON.stringify(payload.strategy)
+  })
+    .then((res: Response) => {
+      if (res.ok) return res.json();
+      throw new Error(`HTTP ${res.status} saving strategy ${payload.id}`);
+    })
+    .then((data: unknown) => {
+      if (data) return ["strategy/load", { strategy: data as Strategy }] as Cmd;
+      throw new Error("No JSON in API response");
+    })
+    .catch((err: Error) => {
+      // Re-throw so the dispatcher's onFailure reaction fires (and so every
+      // path returns a Promise<Cmd>, satisfying the type checker).
+      console.log("Error saving strategy:", err);
+      throw err;
+    });
 }
