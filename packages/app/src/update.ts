@@ -6,6 +6,7 @@ import { Msg } from "./messages.ts";
 
 export type Cmd =
   | ["strategies/load", { strategies: Strategy[] }]
+  | ["strategies/error", { message: string }]
   | ["strategy/load", { strategy: Strategy }];
 
 export default function update(
@@ -17,14 +18,21 @@ export default function update(
   switch (command) {
     case "strategies/request":
       return [
-        { ...model },
+        { ...model, error: undefined },
         fetchStrategies(auth)
       ] as Message.Async<Model, Cmd>;
 
     case "strategies/load":
       return {
         ...model,
+        error: undefined,
         strategies: (payload as { strategies: Strategy[] }).strategies
+      };
+
+    case "strategies/error":
+      return {
+        ...model,
+        error: (payload as { message: string }).message
       };
 
     case "strategy/request":
@@ -83,7 +91,11 @@ function fetchStrategies(auth: Auth.Model): Promise<Cmd | Message.None> {
       const strategies = Array.isArray(data) ? data as Strategy[] : [];
       return ["strategies/load", { strategies }] as Cmd;
     })
-    .catch(() => Message.None);
+    .catch(() =>
+      ["strategies/error", {
+        message: "Couldn't load strategies. Please try again."
+      }] as Cmd
+    );
 }
 
 function fetchStrategy(id: string, auth: Auth.Model): Promise<Cmd | Message.None> {

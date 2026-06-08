@@ -1,6 +1,14 @@
 import { css, html, shadow } from "@unbndl/html";
+import { createViewModel } from "@unbndl/view";
+import { fromHistory } from "@unbndl/switch";
 
 export class AlgoHeaderElement extends HTMLElement {
+  // Observe the current location from the history provider so the nav can
+  // highlight the active page reactively as the user navigates the SPA.
+  viewModel = createViewModel<{ location?: Location }>({
+    location: undefined
+  }).with(fromHistory(this), "location");
+
   constructor() {
     super();
     shadow(this)
@@ -12,8 +20,8 @@ export class AlgoHeaderElement extends HTMLElement {
             <span class="brand-name">AlgoTrader</span>
           </a>
           <nav class="header-nav">
-            <a href="/app">Home</a>
-            <a href="/app/strategies">Strategies</a>
+            <a href="/app" data-match="/app">Home</a>
+            <a href="/app/strategies" data-match="/app/strategies">Strategies</a>
           </nav>
           <nav class="header-user logged-out">
             <span class="user-name"></span>
@@ -31,9 +39,15 @@ export class AlgoHeaderElement extends HTMLElement {
       .delegate(".when-signed-in button", {
         click: () => this.signout()
       });
+
+    // Re-evaluate which nav link is "current" whenever the location changes.
+    this.viewModel.createEffect(($) => {
+      this._updateActiveNav($.location?.pathname ?? window.location.pathname);
+    });
   }
 
   connectedCallback() {
+    this._updateActiveNav(window.location.pathname);
     const token = localStorage.getItem("un-auth:token");
     if (token) this._updateAuth(true, this._decodeUsername(token));
     this.addEventListener("auth:message", (ev: any) => {
@@ -43,6 +57,24 @@ export class AlgoHeaderElement extends HTMLElement {
       } else if (type === "auth/signout") {
         this._updateAuth(false, undefined);
       }
+    });
+  }
+
+  // Mark the nav link whose route matches the current path. Home matches only
+  // the exact "/app" path; Strategies matches "/app/strategies" and any of its
+  // sub-routes (detail / edit / new).
+  _updateActiveNav(pathname: string) {
+    const root = this.shadowRoot;
+    if (!root) return;
+    root.querySelectorAll(".header-nav a").forEach((el) => {
+      const match = el.getAttribute("data-match") || "";
+      const isActive =
+        match === "/app"
+          ? pathname === "/app"
+          : pathname === match || pathname.startsWith(match + "/");
+      el.classList.toggle("active", isActive);
+      if (isActive) el.setAttribute("aria-current", "page");
+      else el.removeAttribute("aria-current");
     });
   }
 
@@ -78,7 +110,7 @@ export class AlgoHeaderElement extends HTMLElement {
       background-color: var(--color-background-header);
       color: var(--color-text-header);
       padding: 0 var(--space-lg);
-      height: 60px;
+      min-height: 60px;
       border-bottom: 2px solid var(--color-border-accent);
     }
     .header-brand {
@@ -97,6 +129,11 @@ export class AlgoHeaderElement extends HTMLElement {
     .header-nav a:hover {
       color: var(--color-text-header);
       background-color: var(--color-background-surface);
+    }
+    .header-nav a.active {
+      color: var(--color-accent);
+      background-color: var(--color-background-surface);
+      font-weight: 700;
     }
     .header-user {
       display: flex; align-items: center; gap: var(--space-sm);
@@ -120,6 +157,23 @@ export class AlgoHeaderElement extends HTMLElement {
     .when-signed-out a:hover {
       background-color: var(--color-accent-dim);
       color: var(--color-background-page);
+    }
+
+    /* Narrow screens: let the header wrap onto multiple rows instead of
+       crowding the brand, nav, and user menu into a single 60px line. */
+    @media (max-width: 540px) {
+      header {
+        flex-wrap: wrap;
+        gap: var(--space-sm);
+        padding: var(--space-sm) var(--space-md);
+      }
+      .header-brand { flex: 1 0 auto; }
+      .header-nav {
+        order: 3;
+        flex: 1 0 100%;
+        justify-content: flex-start;
+      }
+      .header-user { margin-left: auto; }
     }
   `;
 }

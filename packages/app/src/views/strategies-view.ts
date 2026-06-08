@@ -1,5 +1,5 @@
 import { css, html, shadow } from "@unbndl/html";
-import { createViewModel } from "@unbndl/view";
+import { createView, createViewModel, View } from "@unbndl/view";
 import { Store, fromStore } from "@unbndl/store";
 import { Strategy } from "server/models";
 import { Msg } from "../messages.ts";
@@ -7,11 +7,63 @@ import { Model } from "../model.ts";
 
 interface StrategiesViewModel {
   strategies?: Strategy[];
+  error?: string;
 }
 
 export class StrategiesViewElement extends HTMLElement {
-  viewModel = createViewModel<StrategiesViewModel>({ strategies: undefined })
-    .with(fromStore<Model>(this), "strategies");
+  // Observe both the cached strategy list and any load error from the store.
+  viewModel = createViewModel<StrategiesViewModel>({
+    strategies: undefined,
+    error: undefined
+  })
+    .with(fromStore<Model>(this), "strategies")
+    .with(fromStore<Model>(this), "error");
+
+  // A single strategy card. Built with the declarative `html` helper so the
+  // name/description are escaped automatically (no raw innerHTML interpolation).
+  cardView = createView<Strategy>(html`
+    <a class="strategy-card" href=${($) => `/app/strategies/${$.id}`}>
+      <h2>${($) => $.name || "Unnamed Strategy"}</h2>
+      <p>${($) => $.description || ""}</p>
+    </a>
+  `);
+
+  // Simple message rows for the loading / empty / error states.
+  loadingView = createView<{}>(html`<p class="empty">Loading…</p>`);
+  emptyView = createView<{}>(
+    html`<p class="empty">No strategies found.</p>`
+  );
+  errorView = createView<{ error: string }>(
+    html`<p class="error" role="alert">${($) => $.error}</p>`
+  );
+
+  view = createView<StrategiesViewModel>(html`
+    <div class="list-header">
+      <h1>Strategies</h1>
+      <a class="new-link" href="/app/strategies/new">+ New Strategy</a>
+    </div>
+    <div class="strategy-list">
+      ${($) =>
+        $.error
+          ? View.apply(this.errorView, { error: $.error })
+          : !$.strategies
+          ? View.apply(this.loadingView, {})
+          : $.strategies.length === 0
+          ? View.apply(this.emptyView, {})
+          : View.map(this.cardView, $.strategies)}
+    </div>
+  `);
+
+  constructor() {
+    super();
+    shadow(this)
+      .styles(StrategiesViewElement.styles)
+      .replace(this.viewModel.render(this.view));
+  }
+
+  connectedCallback() {
+    Store.dispatch(this, ["strategies/request", {}] as Msg);
+  }
 
   static styles = css`
     :host { display: block; padding: var(--space-xl); }
@@ -48,45 +100,6 @@ export class StrategiesViewElement extends HTMLElement {
     .strategy-card h2 { color: var(--color-text-header); font-size: 1rem; margin: 0 0 var(--space-xs); }
     .strategy-card p { color: var(--color-text-muted); font-size: 0.875rem; margin: 0; }
     .empty { color: var(--color-text-muted); }
+    .error { color: rgb(220 60 60); font-size: 0.9rem; margin: 0; }
   `;
-
-  constructor() {
-    super();
-    shadow(this).styles(StrategiesViewElement.styles).replace(html`
-      <div class="list-header">
-        <h1>Strategies</h1>
-        <a class="new-link" href="/app/strategies/new">+ New Strategy</a>
-      </div>
-      <div class="strategy-list"><p class="empty">Loading...</p></div>
-    `);
-
-    this.viewModel.createEffect(($) => {
-      this._render($.strategies);
-    });
-  }
-
-  connectedCallback() {
-    Store.dispatch(this, ["strategies/request", {}] as Msg);
-  }
-
-  private _render(strategies?: Strategy[]) {
-    const container = this.shadowRoot?.querySelector(".strategy-list");
-    if (!container) return;
-    if (!strategies) {
-      container.innerHTML = `<p class="empty">Loading...</p>`;
-      return;
-    }
-    if (strategies.length === 0) {
-      container.innerHTML = `<p class="empty">No strategies found.</p>`;
-      return;
-    }
-    container.innerHTML = "";
-    strategies.forEach(s => {
-      const card = document.createElement("a");
-      card.className = "strategy-card";
-      card.setAttribute("href", `/app/strategies/${s.id}`);
-      card.innerHTML = `<h2>${s.name || "Unnamed Strategy"}</h2><p>${s.description || ""}</p>`;
-      container.appendChild(card);
-    });
-  }
 }

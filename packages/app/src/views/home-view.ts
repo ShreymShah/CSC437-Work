@@ -7,7 +7,6 @@ export class HomeViewElement extends HTMLElement {
       <p>Welcome to AlgoTrader. Select a section to get started.</p>
       <nav class="home-nav">
         <a href="/app/strategies">
-          <svg class="icon"><use href="/icons/finance.svg#icon-signal"/></svg>
           View Strategies
         </a>
       </nav>
@@ -30,7 +29,6 @@ export class HomeViewElement extends HTMLElement {
       font-weight: 700;
     }
     .home-nav a:hover { border-color: var(--color-accent-dim); }
-    .icon { width: 1.2em; height: 1.2em; fill: currentColor; }
   `;
 
   constructor() {

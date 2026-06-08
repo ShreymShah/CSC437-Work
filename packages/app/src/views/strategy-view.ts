@@ -12,26 +12,27 @@ import { Msg } from "../messages.ts";
 import { Model } from "../model.ts";
 
 type StrategyMode = "view" | "edit" | "new";
-
-// An empty strategy used to seed the create form in "new" mode.
-const BLANK_STRATEGY: Strategy = {
-  id: "",
-  name: "",
-  description: "",
-  components: [],
-  status: []
-};
+type RowKind = "components" | "status";
 
 interface StrategyViewModel {
   mode: StrategyMode;
   strategyId?: string;
+  // The strategy as loaded from the store (used for the read-only view and to
+  // seed the editable draft).
   strategy?: Strategy;
+  // A working copy edited by the create/edit forms. Inputs bind to this so that
+  // typed values survive the re-render triggered by adding/removing stat rows.
+  draft?: Strategy;
 }
 
 export class StrategyViewElement extends HTMLElement {
+  // Guards one-time seeding of the editable draft from the loaded strategy.
+  private seeded = false;
+
   // The view model blends three sources:
   //  - `mode`/`strategyId` come from this element's attributes (set by the route)
   //  - `strategy` is observed from the shared store (the Model)
+  //  - `draft` is local editable state we update as the user edits the form
   viewModel = createViewModel<StrategyViewModel>({
     mode: "view" as StrategyMode
   })
@@ -54,6 +55,48 @@ export class StrategyViewElement extends HTMLElement {
     </li>
   `);
 
+  // Placeholder shown when a strategy has no components or no status, so the
+  // section reads as intentionally empty rather than looking broken.
+  emptyStatView = createView<{ label: string }>(html`
+    <li class="stat-empty">${($) => $.label}</li>
+  `);
+
+  // A single editable stat row (label + value) used by both forms. Any extra
+  // fields the row originally had (unit, href, …) are preserved through a
+  // serialized `data-extra` attribute so editing doesn't silently drop them.
+  rowView = createView<AlgoStat>(html`
+    <div class="row" data-extra=${($) => this.extraJSON($)}>
+      <input
+        class="row-input"
+        data-field="label"
+        placeholder="Label"
+        .value=${($) => $.label ?? ""}
+      />
+      <input
+        class="row-input"
+        data-field="value"
+        placeholder="Value"
+        .value=${($) => $.value ?? ""}
+      />
+      <button type="button" class="remove-row" title="Remove row" aria-label="Remove row">
+        ✕
+      </button>
+    </div>
+  `);
+
+  // The ID field, shown only when creating a new strategy.
+  idFieldView = createView<{ id: string }>(html`
+    <label>
+      <span>ID</span>
+      <input
+        name="id"
+        required
+        placeholder="e.g. btc-momentum"
+        .value=${($) => $.id ?? ""}
+      />
+    </label>
+  `);
+
   // Read-only presentation of a strategy.
   mainView = createView<Strategy>(html`
     <article class="card">
@@ -68,84 +111,96 @@ export class StrategyViewElement extends HTMLElement {
         <section>
           <h2>Components</h2>
           <ul class="stats">
-            ${($) => View.map(this.statView, $.components ?? [])}
+            ${($) =>
+              ($.components ?? []).length
+                ? View.map(this.statView, $.components ?? [])
+                : View.apply(this.emptyStatView, {
+                    label: "No components yet."
+                  })}
           </ul>
         </section>
         <section>
           <h2>Status</h2>
           <ul class="stats">
-            ${($) => View.map(this.statView, $.status ?? [])}
+            ${($) =>
+              ($.status ?? []).length
+                ? View.map(this.statView, $.status ?? [])
+                : View.apply(this.emptyStatView, {
+                    label: "No status reported yet."
+                  })}
           </ul>
         </section>
       </div>
     </article>
   `);
 
-  // The editable form. Each <input>/<textarea> has a name= matching a
-  // Strategy property so formDataToJSON can rebuild the object on submit.
-  editView = createView<Strategy>(html`
+  // The editable form, shared by "edit" and "new" modes. The title, button
+  // label, ID field, and Cancel target switch on `mode`. Stat rows are rendered
+  // from the draft so add/remove re-renders keep every row's typed values.
+  editView = createView<StrategyViewModel>(html`
     <form class="card">
-      <h1>Edit Strategy</h1>
+      <h1>${($) => ($.mode === "new" ? "New Strategy" : "Edit Strategy")}</h1>
+      ${($) =>
+        $.mode === "new"
+          ? View.apply(this.idFieldView, { id: $.draft?.id ?? "" })
+          : ""}
       <label>
         <span>Name</span>
-        <input name="name" .value=${($) => $.name ?? ""} />
+        <input name="name" .value=${($) => $.draft?.name ?? ""} />
       </label>
       <label>
         <span>Description</span>
         <textarea name="description" rows="4" .value=${($) =>
-          $.description ?? ""}></textarea>
+          $.draft?.description ?? ""}></textarea>
       </label>
+
+      <section class="rows-section">
+        <h2>Components</h2>
+        <div class="rows" data-kind="components">
+          ${($) => View.map(this.rowView, $.draft?.components ?? [])}
+        </div>
+        <button type="button" class="add-row" data-kind="components">
+          + Add component
+        </button>
+      </section>
+
+      <section class="rows-section">
+        <h2>Status</h2>
+        <div class="rows" data-kind="status">
+          ${($) => View.map(this.rowView, $.draft?.status ?? [])}
+        </div>
+        <button type="button" class="add-row" data-kind="status">
+          + Add status
+        </button>
+      </section>
+
       <div class="actions">
-        <button type="submit">Save</button>
-        <a class="btn cancel" href=${($) => `/app/strategies/${$.id}`}
+        <button type="submit">
+          ${($) => ($.mode === "new" ? "Create" : "Save")}
+        </button>
+        <a
+          class="btn cancel"
+          href=${($) =>
+            $.mode === "new"
+              ? "/app/strategies"
+              : `/app/strategies/${$.draft?.id ?? ""}`}
           >Cancel</a
         >
       </div>
     </form>
   `);
 
-  // The create form. Like editView, but with an extra `id` field since a new
-  // strategy needs a unique id (in edit mode the id comes from the route).
-  newView = createView<Strategy>(html`
-    <form class="card">
-      <h1>New Strategy</h1>
-      <label>
-        <span>ID</span>
-        <input
-          name="id"
-          required
-          placeholder="e.g. btc-momentum"
-          .value=${($) => $.id ?? ""}
-        />
-      </label>
-      <label>
-        <span>Name</span>
-        <input name="name" .value=${($) => $.name ?? ""} />
-      </label>
-      <label>
-        <span>Description</span>
-        <textarea name="description" rows="4" .value=${($) =>
-          $.description ?? ""}></textarea>
-      </label>
-      <div class="actions">
-        <button type="submit">Create</button>
-        <a class="btn cancel" href="/app/strategies">Cancel</a>
-      </div>
-    </form>
-  `);
-
-  // The top-level view: in "new" mode show the create form; otherwise pick the
-  // editor or the read-only card once the store has the strategy.
+  // The top-level view: read-only card in "view" mode, otherwise the editable
+  // form once the draft has been seeded.
   view = createView<StrategyViewModel>(html`
     <section class="strategy">
       ${($) =>
-        $.mode === "new"
-          ? View.apply(this.newView, BLANK_STRATEGY)
-          : $.strategy
-          ? View.apply(
-              $.mode === "edit" ? this.editView : this.mainView,
-              $.strategy
-            )
+        $.mode === "view"
+          ? $.strategy
+            ? View.apply(this.mainView, $.strategy)
+            : "Loading…"
+          : $.draft
+          ? View.apply(this.editView, $)
           : "Loading…"}
     </section>
   `);
@@ -158,7 +213,34 @@ export class StrategyViewElement extends HTMLElement {
       // Take over the browser's default form submission.
       .listen({
         submit: (ev: Event) => this.submitForm(ev)
-      });
+      })
+      // Add/remove stat rows (delegated so dynamically-added rows work too).
+      .delegate(".add-row", { click: (ev: Event) => this.onAddRow(ev) })
+      .delegate(".remove-row", { click: (ev: Event) => this.onRemoveRow(ev) });
+
+    // Seed the editable draft exactly once: empty for "new", or a copy of the
+    // loaded strategy for "edit" (which may arrive after an async fetch).
+    this.viewModel.createEffect(($) => {
+      if (this.seeded) return;
+      if ($.mode === "new") {
+        this.seeded = true;
+        this.viewModel.update({
+          draft: { id: "", name: "", description: "", components: [], status: [] }
+        });
+      } else if ($.mode === "edit" && $.strategy) {
+        this.seeded = true;
+        const s = $.strategy;
+        this.viewModel.update({
+          draft: {
+            id: s.id,
+            name: s.name ?? "",
+            description: s.description ?? "",
+            components: (s.components ?? []).map((r) => ({ ...r })),
+            status: (s.status ?? []).map((r) => ({ ...r }))
+          }
+        });
+      }
+    });
   }
 
   connectedCallback() {
@@ -166,24 +248,52 @@ export class StrategyViewElement extends HTMLElement {
     if (id) Store.dispatch(this, ["strategy/request", { id }] as Msg);
   }
 
+  // Serialize the fields of a stat row other than label/value so they can be
+  // preserved across edits. Returns "" when there's nothing extra to keep.
+  private extraJSON(stat: AlgoStat): string {
+    const { label, value, ...rest } = stat;
+    const keys = Object.keys(rest).filter(
+      (k) => (rest as Record<string, unknown>)[k] != null
+    );
+    return keys.length ? JSON.stringify(rest) : "";
+  }
+
+  onAddRow(ev: Event) {
+    const btn = (ev.target as HTMLElement).closest(".add-row");
+    if (!btn) return;
+    const kind = btn.getAttribute("data-kind") as RowKind;
+    const draft = this.readDraft();
+    draft[kind] = [...draft[kind], { label: "", value: "" }];
+    this.viewModel.update({ draft });
+  }
+
+  onRemoveRow(ev: Event) {
+    const btn = (ev.target as HTMLElement).closest(".remove-row");
+    if (!btn) return;
+    const row = btn.closest(".row");
+    const container = btn.closest(".rows");
+    if (!row || !container) return;
+    const kind = container.getAttribute("data-kind") as RowKind;
+    const index = Array.from(container.querySelectorAll(".row")).indexOf(row);
+    const draft = this.readDraft();
+    draft[kind].splice(index, 1);
+    this.viewModel.update({ draft });
+  }
+
   submitForm(ev: Event) {
     ev.preventDefault();
 
-    const form = ev.target as HTMLFormElement;
-    const json = this.formDataToJSON(form);
+    const draft = this.readDraft();
+    // Drop rows the user left completely blank.
+    const clean = (rows: AlgoStat[]) =>
+      rows.filter((r) => (r.label ?? "").trim() || (r.value ?? "").trim());
+    draft.components = clean(draft.components);
+    draft.status = clean(draft.status);
 
     if (this.viewModel.$.mode === "new") {
-      // Creating: the id comes from the form. Default the nested arrays so the
-      // record satisfies the Strategy shape even though the form omits them.
-      const id = (json.id ?? "").trim();
+      const id = draft.id.trim();
       if (!id) return;
-
-      const strategy = {
-        components: [],
-        status: [],
-        ...json,
-        id
-      } as Strategy;
+      const strategy = { ...draft, id } as Strategy;
 
       Store.dispatch(this, [
         "strategy/create",
@@ -201,12 +311,11 @@ export class StrategyViewElement extends HTMLElement {
 
     // Editing: the id comes from the route attribute, not the form.
     const id = this.viewModel.$.strategyId;
-    const current = this.viewModel.$.strategy;
     if (!id) return;
+    const current = this.viewModel.$.strategy;
 
-    // Merge the edited fields over the current strategy so nested data
-    // (components/status) is preserved, and keep the id intact.
-    const strategy = { ...(current ?? {}), ...json, id } as Strategy;
+    // Merge edited fields over the current strategy and keep the id intact.
+    const strategy = { ...(current ?? {}), ...draft, id } as Strategy;
 
     Store.dispatch(this, [
       "strategy/save",
@@ -221,15 +330,57 @@ export class StrategyViewElement extends HTMLElement {
     ] as Msg);
   }
 
-  // Collect [name, value] pairs from every named form control and turn them
-  // into a plain object whose keys match the Strategy interface.
-  formDataToJSON(form: HTMLFormElement): Record<string, string> {
-    const inputs = Array.from(form.elements).filter(
-      (el) => "name" in el && (el as HTMLInputElement).name !== ""
-    ) as Array<HTMLInputElement>;
+  // Read the entire editable form back out of the DOM into a Strategy. The DOM
+  // is the source of truth while editing, so this is called before any
+  // structural change (add/remove row) and on submit.
+  private readDraft(): Strategy {
+    const root = this.shadowRoot;
+    const getVal = (sel: string) =>
+      (
+        root?.querySelector(sel) as
+          | HTMLInputElement
+          | HTMLTextAreaElement
+          | null
+      )?.value ?? "";
 
-    const entries = inputs.map((el) => [el.name, el.value] as const);
-    return Object.fromEntries(entries);
+    const readRows = (kind: RowKind): AlgoStat[] => {
+      const container = root?.querySelector(`.rows[data-kind="${kind}"]`);
+      if (!container) return [];
+      return Array.from(container.querySelectorAll(".row")).map((row) => {
+        let extra: Partial<AlgoStat> = {};
+        const raw = (row as HTMLElement).getAttribute("data-extra");
+        if (raw) {
+          try {
+            extra = JSON.parse(raw);
+          } catch {
+            extra = {};
+          }
+        }
+        return {
+          ...extra,
+          label:
+            (row.querySelector('[data-field="label"]') as HTMLInputElement)
+              ?.value ?? "",
+          value:
+            (row.querySelector('[data-field="value"]') as HTMLInputElement)
+              ?.value ?? ""
+        } as AlgoStat;
+      });
+    };
+
+    const mode = this.viewModel.$.mode;
+    const id =
+      mode === "new"
+        ? getVal('input[name="id"]')
+        : this.viewModel.$.draft?.id ?? this.viewModel.$.strategyId ?? "";
+
+    return {
+      id,
+      name: getVal('input[name="name"]'),
+      description: getVal('textarea[name="description"]'),
+      components: readRows("components"),
+      status: readRows("status")
+    };
   }
 
   static styles = css`
@@ -295,6 +446,11 @@ export class StrategyViewElement extends HTMLElement {
       color: var(--color-text);
       font-weight: 700;
     }
+    .stat-empty {
+      color: var(--color-text-muted);
+      font-size: 0.875rem;
+      font-style: italic;
+    }
     .empty {
       color: var(--color-text-muted);
     }
@@ -321,6 +477,49 @@ export class StrategyViewElement extends HTMLElement {
     textarea:focus {
       outline: none;
       border-color: var(--color-accent);
+    }
+    .rows-section {
+      margin-bottom: var(--space-lg);
+    }
+    .rows {
+      display: grid;
+      gap: var(--space-sm);
+      margin-bottom: var(--space-sm);
+    }
+    .row {
+      display: flex;
+      gap: var(--space-sm);
+      align-items: center;
+    }
+    .row .row-input {
+      flex: 1;
+    }
+    .remove-row {
+      flex: 0 0 auto;
+      background: none;
+      border: 1px solid var(--color-border);
+      color: var(--color-text-muted);
+      border-radius: var(--border-radius);
+      padding: var(--space-xs) var(--space-sm);
+      cursor: pointer;
+      line-height: 1;
+    }
+    .remove-row:hover {
+      color: rgb(220 60 60);
+      border-color: rgb(220 60 60);
+    }
+    .add-row {
+      background: none;
+      border: 1px dashed var(--color-border);
+      color: var(--color-text-muted);
+      border-radius: var(--border-radius);
+      padding: var(--space-xs) var(--space-md);
+      font-size: 0.8rem;
+      cursor: pointer;
+    }
+    .add-row:hover {
+      color: var(--color-accent);
+      border-color: var(--color-accent-dim);
     }
     .actions {
       display: flex;
