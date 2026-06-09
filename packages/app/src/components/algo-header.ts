@@ -49,7 +49,22 @@ export class AlgoHeaderElement extends HTMLElement {
   connectedCallback() {
     this._updateActiveNav(window.location.pathname);
     const token = localStorage.getItem("un-auth:token");
-    if (token) this._updateAuth(true, this._decodeUsername(token));
+    if (token) {
+      this._updateAuth(true, this._decodeUsername(token));
+    } else {
+      // Not signed in: bounce to the login page. This dispatches the auth
+      // provider's "auth/redirect" message, which navigates to the provider's
+      // configured redirect target (/login.html). Without this, a logged-out
+      // visitor would land on the dashboard instead of being sent to log in.
+      this.dispatchEvent(
+        new CustomEvent("auth:message", {
+          bubbles: true,
+          composed: true,
+          detail: ["auth/redirect"]
+        })
+      );
+      return;
+    }
     this.addEventListener("auth:message", (ev: any) => {
       const [type, payload] = ev.detail || [];
       if (type === "auth/signin" && payload?.token) {
