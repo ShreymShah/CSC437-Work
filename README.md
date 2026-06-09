@@ -1,4 +1,4 @@
-# AlgoTrader — CSC 437 Final Project
+# AlgoTrader: CSC 437 Final Project
 
 AlgoTrader is a client-rendered single-page application for browsing, creating, and
 editing algorithmic-trading **strategies**. The browser renders all UI from JSON data
@@ -6,6 +6,7 @@ served by a REST API; the server never generates HTML. Data is persisted in a cl
 MongoDB database and access is protected by JWT-based authentication.
 
 **Live app:** https://sshah84.csse.dev/
+
 **Grading branch:** `main`
 
 ---
