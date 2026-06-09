@@ -1,19 +1,22 @@
-import express, { Request, Response } from "express";
+import express, { Response } from "express";
 import { Strategy } from "../models/index.ts";
 import Strategies from "../services/strategy-svc.ts";
+import { AuthedRequest } from "./auth.ts";
 
 const router = express.Router();
 
-router.get("/", (_, res: Response) => {
-  Strategies.index()
+router.get("/", (req: AuthedRequest, res: Response) => {
+  const owner = req.username ?? "";
+  Strategies.index(owner)
     .then((list: Strategy[]) => res.send(list))
     .catch((err) => res.status(500).send(err));
 });
 
-router.get("/:id", (req: Request<{ id: string }>, res: Response) => {
-  const { id } = req.params;
+router.get("/:id", (req: AuthedRequest, res: Response) => {
+  const { id } = req.params as { id: string };
+  const owner = req.username ?? "";
 
-  Strategies.get(id)
+  Strategies.get(id, owner)
     .then((strategy: Strategy | null) => {
       if (!strategy) res.status(404).send();
       else res.send(strategy);
@@ -21,27 +24,30 @@ router.get("/:id", (req: Request<{ id: string }>, res: Response) => {
     .catch((err) => res.status(404).send(err));
 });
 
-router.post("/", (req: Request, res: Response) => {
+router.post("/", (req: AuthedRequest, res: Response) => {
   const newStrategy = req.body as Strategy;
+  const owner = req.username ?? "";
 
-  Strategies.create(newStrategy)
+  Strategies.create(newStrategy, owner)
     .then((strategy: Strategy) => res.status(201).json(strategy))
     .catch((err) => res.status(500).send(err));
 });
 
-router.put("/:id", (req: Request<{ id: string }>, res: Response) => {
-  const { id } = req.params;
+router.put("/:id", (req: AuthedRequest, res: Response) => {
+  const { id } = req.params as { id: string };
   const updatedStrategy = req.body as Strategy;
+  const owner = req.username ?? "";
 
-  Strategies.update(id, updatedStrategy)
+  Strategies.update(id, updatedStrategy, owner)
     .then((strategy: Strategy) => res.json(strategy))
     .catch((err) => res.status(404).send(err));
 });
 
-router.delete("/:id", (req: Request<{ id: string }>, res: Response) => {
-  const { id } = req.params;
+router.delete("/:id", (req: AuthedRequest, res: Response) => {
+  const { id } = req.params as { id: string };
+  const owner = req.username ?? "";
 
-  Strategies.remove(id)
+  Strategies.remove(id, owner)
     .then(() => res.status(204).end())
     .catch((err) => res.status(404).send(err));
 });

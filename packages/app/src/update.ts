@@ -7,7 +7,8 @@ import { Msg } from "./messages.ts";
 export type Cmd =
   | ["strategies/load", { strategies: Strategy[] }]
   | ["strategies/error", { message: string }]
-  | ["strategy/load", { strategy: Strategy }];
+  | ["strategy/load", { strategy: Strategy }]
+  | ["strategy/removed", { id: string }];
 
 export default function update(
   model: Readonly<Model>,
@@ -69,6 +70,23 @@ export default function update(
         { ...model },
         saveStrategy(payload as { id: string; strategy: Strategy }, auth)
       ] as Message.Async<Model, Cmd>;
+
+    case "strategy/delete":
+      // Issue the DELETE; the resolved "strategy/removed" command prunes the
+      // store once the server confirms.
+      return [
+        { ...model },
+        deleteStrategy(payload as { id: string }, auth)
+      ] as Message.Async<Model, Cmd>;
+
+    case "strategy/removed": {
+      const { id } = payload as { id: string };
+      return {
+        ...model,
+        strategies: model.strategies?.filter((s) => s.id !== id),
+        strategy: model.strategy?.id === id ? undefined : model.strategy
+      };
+    }
 
     default: {
       // Exhaustiveness check: if every Msg/Cmd is handled above, `command`
@@ -167,6 +185,27 @@ function createStrategy(
     })
     .catch((err: Error) => {
       console.log("Error creating strategy:", err);
+      throw err;
+    });
+}
+
+// Issues a DELETE for the given strategy. On success the server returns 204
+// (no body), so we resolve to a "strategy/removed" command that prunes the
+// store.
+function deleteStrategy(
+  payload: { id: string },
+  auth: Auth.Model
+): Promise<Cmd | Message.None> {
+  return fetch(`/api/strategies/${payload.id}`, {
+    method: "DELETE",
+    headers: Auth.headers(auth) as HeadersInit
+  })
+    .then((res: Response) => {
+      if (res.ok) return ["strategy/removed", { id: payload.id }] as Cmd;
+      throw new Error(`HTTP ${res.status} deleting strategy ${payload.id}`);
+    })
+    .catch((err: Error) => {
+      console.log("Error deleting strategy:", err);
       throw err;
     });
 }

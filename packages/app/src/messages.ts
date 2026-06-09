@@ -23,4 +23,14 @@ export type Msg =
         onSuccess?: () => void;
         onFailure?: (err: Error) => void;
       }
+    ]
+  | [
+      "strategy/delete",
+      {
+        id: string;
+      },
+      {
+        onSuccess?: () => void;
+        onFailure?: (err: Error) => void;
+      }
     ];

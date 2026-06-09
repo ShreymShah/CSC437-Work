@@ -54,6 +54,12 @@ function generateAccessToken(username: string): Promise<string> {
   });
 }
 
+// Request augmented with the authenticated user's username, set by
+// authenticateUser after verifying the JWT.
+export interface AuthedRequest extends Request {
+  username?: string;
+}
+
 export function authenticateUser(
   req: Request,
   res: Response,
@@ -66,8 +72,12 @@ export function authenticateUser(
     res.status(401).end();
   } else {
     jwt.verify(token, TOKEN_SECRET, (error, decoded) => {
-      if (decoded) next();
-      else res.status(401).end();
+      if (decoded) {
+        (req as AuthedRequest).username = (
+          decoded as { username?: string }
+        ).username;
+        next();
+      } else res.status(401).end();
     });
   }
 }

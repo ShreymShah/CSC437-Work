@@ -102,9 +102,13 @@ export class StrategyViewElement extends HTMLElement {
     <article class="card">
       <header class="card-header">
         <h1>${($) => $.name || "Unnamed Strategy"}</h1>
-        <a class="btn edit-link" href=${($) => `/app/strategies/${$.id}/edit`}
-          >Edit</a
-        >
+        <div class="header-actions">
+          <a class="btn edit-link" href=${($) =>
+            `/app/strategies/${$.id}/edit`}
+            >Edit</a
+          >
+          <button type="button" class="btn delete-btn">Delete</button>
+        </div>
       </header>
       <p class="description">${($) => $.description || ""}</p>
       <div class="stat-grid">
@@ -216,7 +220,9 @@ export class StrategyViewElement extends HTMLElement {
       })
       // Add/remove stat rows (delegated so dynamically-added rows work too).
       .delegate(".add-row", { click: (ev: Event) => this.onAddRow(ev) })
-      .delegate(".remove-row", { click: (ev: Event) => this.onRemoveRow(ev) });
+      .delegate(".remove-row", { click: (ev: Event) => this.onRemoveRow(ev) })
+      // Delete the whole strategy (from the read-only detail view).
+      .delegate(".delete-btn", { click: () => this.onDelete() });
 
     // Seed the editable draft exactly once: empty for "new", or a copy of the
     // loaded strategy for "edit" (which may arrive after an async fetch).
@@ -258,8 +264,31 @@ export class StrategyViewElement extends HTMLElement {
     return keys.length ? JSON.stringify(rest) : "";
   }
 
-  onAddRow(ev: Event) {
-    const btn = (ev.target as HTMLElement).closest(".add-row");
+  // Delete the current strategy after confirmation, then return to the list.
+  onDelete() {
+    const id = this.viewModel.$.strategy?.id ?? this.viewModel.$.strategyId;
+    if (!id) return;
+    if (
+      !window.confirm(
+        "Delete this strategy? This action cannot be undone."
+      )
+    )
+      return;
+
+    Store.dispatch(this, [
+      "strategy/delete",
+      { id },
+      {
+        onSuccess: () =>
+          BrowserHistory.dispatch(this, "history/navigate", {
+            href: "/app/strategies"
+          }),
+        onFailure: (error: Error) => console.log("ERROR:", error)
+      }
+    ] as Msg);
+  }
+
+  onAddRow(ev: Event) {    const btn = (ev.target as HTMLElement).closest(".add-row");
     if (!btn) return;
     const kind = btn.getAttribute("data-kind") as RowKind;
     const draft = this.readDraft();
@@ -561,6 +590,20 @@ export class StrategyViewElement extends HTMLElement {
     }
     .edit-link:hover {
       background-color: var(--color-accent-dim);
+      color: var(--color-background-page);
+    }
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+    }
+    .delete-btn {
+      border-color: rgb(150 50 50);
+      color: rgb(220 90 90);
+    }
+    .delete-btn:hover {
+      background-color: rgb(220 60 60);
+      border-color: rgb(220 60 60);
       color: var(--color-background-page);
     }
   `;
